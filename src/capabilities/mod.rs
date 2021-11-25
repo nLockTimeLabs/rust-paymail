@@ -1,10 +1,10 @@
-use std::collections::HashMap;
 use crate::capabilities::brfc::BRFC;
-use ureq::{Response, Error};
-use std::time::Duration;
-use serde_derive::{Deserialize};
-use std::iter::Map;
+use serde_derive::Deserialize;
 use serde_json::Value;
+use std::collections::HashMap;
+use std::iter::Map;
+use std::time::Duration;
+use ureq::{Error, Response};
 
 mod brfc;
 
@@ -15,18 +15,18 @@ pub const PUBKEY_PLACEHOLDER: &'static str = "{pubkey}";
 #[derive(Deserialize)]
 pub struct CapabilityResponse {
     bsvalias: serde_json::Value,
-    capabilities: serde_json::Value
+    capabilities: serde_json::Value,
 }
 
 #[derive(Debug)]
 pub enum CapabilityError {
     CapabilityUnavailable,
     PaymailServerUnreachable,
-    BadPaymailServerResponse
+    BadPaymailServerResponse,
 }
 
 pub(crate) struct CapabilitiesFactory {
-    pub capabilities: HashMap<String, String>
+    pub capabilities: HashMap<String, String>,
 }
 
 impl CapabilitiesFactory {
@@ -39,11 +39,9 @@ impl CapabilitiesFactory {
         let capabilities_map = match capabilities_resp {
             Ok(response) => match response.into_json::<CapabilityResponse>() {
                 Ok(json) => json.capabilities,
-                Err(_) => {
-                    return Err(CapabilityError::BadPaymailServerResponse)
-                }
+                Err(_) => return Err(CapabilityError::BadPaymailServerResponse),
             },
-            Err(_) => return Err(CapabilityError::PaymailServerUnreachable)
+            Err(_) => return Err(CapabilityError::PaymailServerUnreachable),
         };
 
         let mut capabilities = HashMap::new();
@@ -55,15 +53,13 @@ impl CapabilitiesFactory {
                         capabilities.insert(brfc_id.clone(), String::from(value));
                     });
                 }
-            },
+            }
             None => {
                 return Err(CapabilityError::BadPaymailServerResponse);
             }
         }
 
-        return Ok(CapabilitiesFactory{
-            capabilities
-        });
+        return Ok(CapabilitiesFactory { capabilities });
     }
 
     pub(crate) fn get_verifyPublicKeyOwnership_template(
@@ -72,23 +68,22 @@ impl CapabilitiesFactory {
         domain: &str,
         pubkey: &str,
     ) -> Result<String, CapabilityError> {
-        let templateUrl = match self.capabilities.get(brfc::VERIFY_PUBLIC_KEY_OWNERSHIP.get_id()) {
+        let templateUrl = match self
+            .capabilities
+            .get(brfc::VERIFY_PUBLIC_KEY_OWNERSHIP.get_id())
+        {
             Some(template) => template,
             None => {
                 return Err(CapabilityError::CapabilityUnavailable);
             }
         };
 
-        return Ok(
-            templateUrl
-                .replace(DOMAIN_PLACEHOLDER, domain)
-                .replace(ALIAS_PLACEHOLDER, alias)
-                .replace(PUBKEY_PLACEHOLDER, pubkey)
-        );
+        return Ok(templateUrl
+            .replace(DOMAIN_PLACEHOLDER, domain)
+            .replace(ALIAS_PLACEHOLDER, alias)
+            .replace(PUBKEY_PLACEHOLDER, pubkey));
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -96,9 +91,6 @@ mod tests {
 
     #[test]
     fn compiles_with_moneybutton_server() {
-        let capabilities = CapabilitiesFactory::get_from_domain("moneybutton.com")
-            .unwrap();
+        let capabilities = CapabilitiesFactory::get_from_domain("moneybutton.com").unwrap();
     }
 }
-
-

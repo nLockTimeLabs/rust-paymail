@@ -12,28 +12,24 @@ lazy_static! {
 
 #[derive(Hash)]
 pub struct BRFC {
-    id: String
+    id: String,
 }
 
 impl BRFC {
     pub fn new(title: &str, author: &str, version: &str) -> Self {
         let brfc_id = bitcoin_hashes::sha256d::Hash::hash(
-            format!("{}{}{}", title.trim(), author.trim(), version.trim()).as_bytes()
-            )
-            .to_hex()[0..12]
+            format!("{}{}{}", title.trim(), author.trim(), version.trim()).as_bytes(),
+        )
+        .to_hex()[0..12]
             .to_string();
 
-        return Self {
-            id: brfc_id
-        }
+        return Self { id: brfc_id };
     }
 
     pub fn get_id(&self) -> &str {
         return &self.id;
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -45,11 +41,7 @@ mod tests {
     }
     #[test]
     fn happy_case_test_vector_1() {
-        let brfc = BRFC::new(
-            "BRFC Specifications",
-            "andy (nChain)",
-            "1"
-        );
+        let brfc = BRFC::new("BRFC Specifications", "andy (nChain)", "1");
         assert_eq!(brfc.get_id(), "57dd1f54fc67");
     }
 
@@ -58,7 +50,7 @@ mod tests {
         let brfc = BRFC::new(
             "bsvalias Payment Addressing (PayTo Protocol Prefix)",
             "andy (nChain)",
-            "1"
+            "1",
         );
         assert_eq!(brfc.get_id(), "74524c4d6274");
     }
