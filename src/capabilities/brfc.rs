@@ -10,6 +10,7 @@ lazy_static! {
     );
 }
 
+#[derive(Hash)]
 pub struct BRFC {
     id: String
 }
