@@ -82,8 +82,8 @@ impl CapabilitiesFactory {
         return Ok(
             templateUrl
                 .replace(DOMAIN_PLACEHOLDER, domain)
-                .replace(ALIAS_PLACEHOLDER, pubkey)
-                .replace(PUBKEY_PLACEHOLDER, alias)
+                .replace(ALIAS_PLACEHOLDER, alias)
+                .replace(PUBKEY_PLACEHOLDER, pubkey)
         );
     }
 }
