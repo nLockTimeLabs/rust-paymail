@@ -1,4 +1,4 @@
-use crate::capabilities::brfc::BRFC;
+use crate::capabilities_finder::brfc::BRFC;
 use serde_derive::Deserialize;
 use serde_json::Value;
 use std::collections::HashMap;
@@ -25,11 +25,11 @@ pub enum CapabilityError {
     BadPaymailServerResponse,
 }
 
-pub(crate) struct CapabilitiesFactory {
+pub(crate) struct CapabilitiesFinder {
     pub capabilities: HashMap<String, String>,
 }
 
-impl CapabilitiesFactory {
+impl CapabilitiesFinder {
     pub(crate) fn get_from_domain(paymail_server: &str) -> Result<Self, CapabilityError> {
         let capabilities_url = format!("https://{}/.well-known/bsvalias", paymail_server);
         let capabilities_resp = ureq::get(&*capabilities_url)
@@ -59,7 +59,7 @@ impl CapabilitiesFactory {
             }
         }
 
-        return Ok(CapabilitiesFactory { capabilities });
+        return Ok(CapabilitiesFinder { capabilities });
     }
 
     pub(crate) fn get_verifyPublicKeyOwnership_template(
@@ -91,6 +91,6 @@ mod tests {
 
     #[test]
     fn compiles_with_moneybutton_server() {
-        let capabilities = CapabilitiesFactory::get_from_domain("moneybutton.com").unwrap();
+        let capabilities = CapabilitiesFinder::get_from_domain("moneybutton.com").unwrap();
     }
 }

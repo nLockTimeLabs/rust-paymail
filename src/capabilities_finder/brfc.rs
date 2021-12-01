@@ -8,6 +8,8 @@ lazy_static! {
         "",
         ""
     );
+
+    pub static ref PKI: BRFC = BRFC::from_id("pki");
 }
 
 #[derive(Hash)]
@@ -16,6 +18,10 @@ pub struct BRFC {
 }
 
 impl BRFC {
+    pub fn from_id(id: &str) -> Self {
+        return BRFC { id: id.to_string() };
+    }
+
     pub fn new(title: &str, author: &str, version: &str) -> Self {
         let brfc_id = bitcoin_hashes::sha256d::Hash::hash(
             format!("{}{}{}", title.trim(), author.trim(), version.trim()).as_bytes(),

@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use crate::capabilities::{CapabilitiesFactory, CapabilityError};
+use crate::capabilities_finder::{CapabilitiesFinder, CapabilityError};
 use serde_derive::Deserialize;
 use std::time::Duration;
 
-mod capabilities;
+mod capabilities_finder;
 
 pub const PAYMAIL_CONN_TIMEOUT: Duration = Duration::from_secs(10);
 
@@ -52,7 +52,7 @@ pub fn public_key_belongs_to_paymail(
     let paymail_server =
         unwrap_option_or_return_err!(splitter.next(), PaymailError::InvalidPaymailAddress);
 
-    let templateUrl = CapabilitiesFactory::get_from_domain(paymail_server)
+    let templateUrl = CapabilitiesFinder::get_from_domain(paymail_server)
         .map_err(|capability_err| PaymailError::CapabilitiesError(capability_err))?
         .get_verifyPublicKeyOwnership_template(alias, paymail_server, public_key)
         .map_err(|capability_err| PaymailError::CapabilitiesError(capability_err))?;
