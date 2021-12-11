@@ -1,34 +1,22 @@
-use trust_dns_client::udp::UdpClientConnection;
-use trust_dns_client::client::Client;
-use trust_dns_client::rr::{DNSClass, RecordType, Name};
-use std::str::FromStr;
-use trust_dns_client::op::DnsResponse;
-use trust_dns_client::proto::rr::RData;
+use srv_rs::{Execution, SrvClient,};
+use trust_dns_resolver::{ Resolver};
+use srv_rs::resolver::{SrvResolver};
+use trust_dns_resolver::proto::rr::rdata::SRV;
 
 pub struct ServerFinder;
 
 
 impl ServerFinder {
-    fn get_server(paymail_server: &str) -> Option<String> {
-        let name = Name::from_str(&*format!("{}", paymail_server)).unwrap();
+    pub fn get_server(paymail_server: &str) -> Option<String> {
+        let (conf, mut opts) = trust_dns_resolver::system_conf::read_system_conf().unwrap();
+        let resolver = Resolver::new(conf, opts).ok()?;
+        let srv_lookup = resolver.srv_lookup(format!("_bsvalias._tcp.{}", paymail_server)).ok()?;
+        let srv_records = srv_lookup.into_iter().collect::<Vec<SRV>>();
+        let first_record = srv_records.get(0)?;
 
-        let address = "8.8.8.8:53".parse().unwrap();
-        let conn = UdpClientConnection::new(address).unwrap();
-
-        // Fetch SRV using DNSSEC client and return.
-        let dnssec_client = trust_dns_client::client::SyncClient::new(conn);
-
-        return dnssec_client
-                .query(&name, DNSClass::IN, RecordType::SRV)
-                .unwrap()
-                .answers()
-                .get(0)
+        return Some(first_record.target().to_string().trim_end_matches(".").to_string());
     }
 }
-
-
-
-
 
 #[cfg(test)]
 mod tests {
